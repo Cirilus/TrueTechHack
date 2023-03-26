@@ -12,12 +12,26 @@ from fastapi.staticfiles import StaticFiles
 from starlette.requests import Request
 from starlette.responses import HTMLResponse
 from starlette.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
+
+
 import cv2
 from models.models import Offer, Settings
 
 ROOT = os.path.dirname(__file__)
 
 app = FastAPI()
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins='*',
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
