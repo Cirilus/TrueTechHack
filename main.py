@@ -75,7 +75,7 @@ async def set_settings(settings: Settings):
 @app.post("/offer")
 async def offer(params: Offer):
     offer = RTCSessionDescription(sdp=params.sdp, type=params.type)
-    pc = RTCPeerConnection(configuration=RTCConfiguration(iceServers=[RTCIceServer(urls="stun:stun.l.google.com:19302")]))
+    pc = RTCPeerConnection(configuration=RTCConfiguration(iceServers=[RTCIceServer(urls="stun:stun.l.google.com:19302", username="test", credential="test")]))
     pcs.add(pc)
 
     player = MediaPlayer("test.mp4")
