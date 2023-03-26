@@ -3,13 +3,12 @@ import logging
 import os
 import time
 
-from aiortc import RTCPeerConnection, RTCSessionDescription, MediaStreamTrack
+from aiortc import RTCPeerConnection, RTCSessionDescription, MediaStreamTrack, RTCIceServer, RTCConfiguration
 from aiortc.contrib.media import MediaPlayer, MediaRelay
 from av.video.frame import VideoFrame
 import numpy as np
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-
 from starlette.requests import Request
 from starlette.responses import HTMLResponse
 from starlette.templating import Jinja2Templates
@@ -76,8 +75,7 @@ async def set_settings(settings: Settings):
 @app.post("/offer")
 async def offer(params: Offer):
     offer = RTCSessionDescription(sdp=params.sdp, type=params.type)
-
-    pc = RTCPeerConnection()
+    pc = RTCPeerConnection(configuration=RTCConfiguration(iceServers=[RTCIceServer(urls="stun:stun.l.google.com:19302")]))
     pcs.add(pc)
 
     player = MediaPlayer("test.mp4")
