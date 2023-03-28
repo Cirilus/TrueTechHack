@@ -13,8 +13,7 @@ from starlette.requests import Request
 from starlette.responses import HTMLResponse
 from starlette.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
-
-
+import json
 import cv2
 from models.models import Offer, Settings
 
@@ -83,7 +82,7 @@ async def set_settings(settings: Settings):
     CONTRAST = settings.contrast
     BRIGHTNESS = settings.brightness
     SATURATION = settings.saturation
-    return {"message": "ok"}
+    return {"Saturation": SATURATION}
 
 
 @app.post("/offer")
@@ -91,7 +90,6 @@ async def offer(params: Offer):
     offer = RTCSessionDescription(sdp=params.sdp, type=params.type)
     pc = RTCPeerConnection(configuration=RTCConfiguration(iceServers=[RTCIceServer(urls="stun:stun.l.google.com:19302", username="test", credential="test")]))
     pcs.add(pc)
-
     player = MediaPlayer("test.mp4")
 
     @pc.on("connectionstatechange")
@@ -100,14 +98,12 @@ async def offer(params: Offer):
         if pc.connectionState == "failed":
             await pc.close()
             pcs.discard(pc)
-
     pc.addTrack(player.audio)
     pc.addTrack(VideoTransformTrack(player.video))
-
+    
     await pc.setRemoteDescription(offer)
     answer = await pc.createAnswer()
     await pc.setLocalDescription(answer)
-
     return {"sdp": pc.localDescription.sdp, "type": pc.localDescription.type}
 
 
