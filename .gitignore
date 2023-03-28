@@ -1,6 +1,5 @@
 __pycache__/
 .idea/
-handlers.py
 demo-instruct.wav
 test_main.http
 test.py
@@ -10,5 +9,4 @@ video1_sub.mp4
 logs/
 env/
 gunicorn_start
-logs/
 video1_sub.mp4

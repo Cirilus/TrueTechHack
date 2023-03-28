@@ -13,7 +13,8 @@ from starlette.requests import Request
 from starlette.responses import HTMLResponse
 from starlette.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
-import json
+
+
 import cv2
 from models.models import Offer, Settings
 
@@ -70,6 +71,10 @@ class VideoTransformTrack(MediaStreamTrack):
         new_frame.time_base = frame.time_base
         return new_frame
 
+    @id.setter
+    def id(self, value):
+        self._id = value
+
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
@@ -82,15 +87,26 @@ async def set_settings(settings: Settings):
     CONTRAST = settings.contrast
     BRIGHTNESS = settings.brightness
     SATURATION = settings.saturation
-    return {"Saturation": SATURATION}
+    return {"message": "ok"}
 
 
 @app.post("/offer")
 async def offer(params: Offer):
     offer = RTCSessionDescription(sdp=params.sdp, type=params.type)
     pc = RTCPeerConnection(configuration=RTCConfiguration(iceServers=[RTCIceServer(urls="stun:stun.l.google.com:19302", username="test", credential="test")]))
+    player = None
     pcs.add(pc)
-    player = MediaPlayer("test.mp4")
+    if params.video_id == 1:
+        if params.video_type == "common":
+            player = MediaPlayer("video1_com.mp4")
+        elif params.video_type == "subtitle":
+            player = MediaPlayer("video1_sub.mp4")
+    else:
+        if params.video_type == "common":
+            player = MediaPlayer("video2_com.MP4")
+        elif params.video_type == "epilepsy":
+            player = MediaPlayer("video2_epilepsy.avi")
+
 
     @pc.on("connectionstatechange")
     async def on_connectionstatechange():
@@ -98,12 +114,14 @@ async def offer(params: Offer):
         if pc.connectionState == "failed":
             await pc.close()
             pcs.discard(pc)
+
     pc.addTrack(player.audio)
-    pc.addTrack(VideoTransformTrack(player.video))
-    
+    pc.addTrack(VideoTransformTrack(player.video, params.video_id, params.video_type))
+
     await pc.setRemoteDescription(offer)
     answer = await pc.createAnswer()
     await pc.setLocalDescription(answer)
+
     return {"sdp": pc.localDescription.sdp, "type": pc.localDescription.type}
 
 
