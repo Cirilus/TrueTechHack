@@ -71,9 +71,6 @@ class VideoTransformTrack(MediaStreamTrack):
         new_frame.time_base = frame.time_base
         return new_frame
 
-    @id.setter
-    def id(self, value):
-        self._id = value
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -114,9 +111,10 @@ async def offer(params: Offer):
         if pc.connectionState == "failed":
             await pc.close()
             pcs.discard(pc)
-
-    pc.addTrack(player.audio)
-    pc.addTrack(VideoTransformTrack(player.video, params.video_id, params.video_type))
+    if player.audio:
+        pc.addTrack(player.audio)
+    if player.video:
+        pc.addTrack(VideoTransformTrack(player.video))
 
     await pc.setRemoteDescription(offer)
     answer = await pc.createAnswer()
